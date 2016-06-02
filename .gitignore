@@ -57,5 +57,4 @@ out/
 # --------------------
 .tmp
 dist/*.map
-lib
 node_modules/
