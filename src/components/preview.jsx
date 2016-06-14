@@ -2,6 +2,7 @@ import React from "react";
 import ReactDom from "react-dom";
 import ReactDOMServer from "react-dom/server";
 import { transform } from "babel-standalone";
+const _ = require('lodash');
 
 const Preview = React.createClass({
     propTypes: {
@@ -57,9 +58,25 @@ const Preview = React.createClass({
           });
         `, { presets: ["es2015", "react", "stage-1"] }).code;
       } else {
+        var code = "";
+        var parts = _.dropRight(this.props.code.split(">"), 1);
+        if (parts[parts.length - 1] === "")
+          if (parts.length > 1) {
+            parts[parts.length - 2] = "ReactDOM.render(" + parts[parts.length - 2];
+            parts[parts.length - 1] = parts[parts.length - 1] + ">, mountNode);";
+            code = parts.join(">");
+          } else {
+            code = this.props.code;
+          }
+        else {
+          parts = this.props.code.split("\n")
+          parts[parts.length - 1] = "ReactDOM.render(" + parts[parts.length - 1] + ", mountNode);";
+          code = parts.join("\n");
+        }
+
         return transform(`
           (function (${Object.keys(this.props.scope).join(",")}, mountNode) {
-            ${this.props.code}
+            ${code}
           });
         `, { presets: ["es2015", "react", "stage-1"] }).code;
       }
